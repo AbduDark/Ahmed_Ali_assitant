@@ -87,7 +87,7 @@ export default function SubjectsPage() {
               >
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{subject.name_ar as string}</div>
-                  {subject.name_en && <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{subject.name_en as string}</div>}
+                  {subject.name_en ? <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{subject.name_en as string}</div> : null}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span className="badge badge-primary">{((subject.units as unknown[]) || []).length} وحدة</span>

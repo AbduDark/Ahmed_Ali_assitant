@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { instructionsApi } from '@/services/api';
-import { Brain, Plus, Trash2, Edit } from 'lucide-react';
+import { Brain, Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 export default function InstructionsPage() {
@@ -89,7 +89,7 @@ export default function InstructionsPage() {
             <div key={inst.id as string} className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
-                  {inst.title && <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{inst.title as string}</div>}
+                  {inst.title ? <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{inst.title as string}</div> : null}
                   <div style={{ color: 'var(--color-text-secondary)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{inst.content as string}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.75rem' }}>
                     {inst.is_active ? <span className="badge badge-success">مفعّل</span> : <span className="badge badge-danger">معطّل</span>}

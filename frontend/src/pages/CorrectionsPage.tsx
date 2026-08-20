@@ -91,12 +91,12 @@ export default function CorrectionsPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, marginBottom: '0.75rem' }}>❓ {corr.question as string}</div>
-                  {corr.bad_answer && (
+                  {corr.bad_answer ? (
                     <div style={{ marginBottom: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(239,68,68,0.08)', borderRadius: 'var(--radius-sm)', borderRight: '3px solid var(--color-danger)' }}>
                       <div style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 600, marginBottom: '0.25rem' }}>❌ الإجابة الخاطئة:</div>
                       <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{corr.bad_answer as string}</div>
                     </div>
-                  )}
+                  ) : null}
                   <div style={{ padding: '0.5rem 0.75rem', background: 'rgba(16,185,129,0.08)', borderRadius: 'var(--radius-sm)', borderRight: '3px solid var(--color-success)' }}>
                     <div style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '0.25rem' }}>✅ الإجابة الصحيحة:</div>
                     <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{corr.correct_answer as string}</div>

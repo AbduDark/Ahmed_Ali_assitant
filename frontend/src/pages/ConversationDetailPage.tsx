@@ -56,21 +56,21 @@ export default function ConversationDetailPage() {
             {/* RAG Metadata — only for assistant messages */}
             {msg.role === 'assistant' && (
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem', paddingRight: '1rem' }}>
-                {msg.response_time_ms && (
+                {msg.response_time_ms ? (
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                     <Clock size={12} /> {msg.response_time_ms as number}ms
                   </span>
-                )}
-                {msg.ai_provider && (
+                ) : null}
+                {msg.ai_provider ? (
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                     <Brain size={12} /> {msg.ai_provider as string}/{msg.ai_model as string}
                   </span>
-                )}
-                {msg.confidence_score != null && (
+                ) : null}
+                {msg.confidence_score != null ? (
                   <span style={{ fontSize: '0.75rem', color: (msg.confidence_score as number) > 0.7 ? 'var(--color-success)' : 'var(--color-warning)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                     ثقة: {((msg.confidence_score as number) * 100).toFixed(0)}%
                   </span>
-                )}
+                ) : null}
               </div>
             )}
 
