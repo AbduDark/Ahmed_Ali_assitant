@@ -39,12 +39,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY pyproject.toml ./
-RUN pip install --no-cache-dir .
-
 # Copy application code
 COPY . .
+
+# Install Python package and dependencies
+RUN pip install --no-cache-dir .
 
 # Create uploads directory
 RUN mkdir -p /app/uploads
