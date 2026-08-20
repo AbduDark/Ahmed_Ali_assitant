@@ -12,19 +12,24 @@ async def create_admin(email: str, password: str, name: str) -> None:
     from app.models.user import UserRole
     from app.services.auth_service import AuthService
 
-    # Ensure tables exist and alter enum columns to standard VARCHAR
+    # 1. Ensure all tables exist
     async with engine.begin() as conn:
-        for query in [
-            "ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50) USING role::text;",
-            "ALTER TABLE messages ALTER COLUMN role TYPE VARCHAR(50) USING role::text;",
-            "ALTER TABLE references ALTER COLUMN status TYPE VARCHAR(50) USING status::text;",
-        ]:
-            try:
-                await conn.execute(text(query))
-            except Exception:
-                pass
         await conn.run_sync(Base.metadata.create_all)
 
+    # 2. Safely alter any existing enum columns to standard VARCHAR in separate transactions
+    alter_statements = [
+        "ALTER TABLE IF EXISTS users ALTER COLUMN role TYPE VARCHAR(50) USING role::text;",
+        "ALTER TABLE IF EXISTS messages ALTER COLUMN role TYPE VARCHAR(50) USING role::text;",
+        "ALTER TABLE IF EXISTS references ALTER COLUMN status TYPE VARCHAR(50) USING status::text;",
+    ]
+    for sql in alter_statements:
+        try:
+            async with engine.begin() as conn:
+                await conn.execute(text(sql))
+        except Exception:
+            pass
+
+    # 3. Create the admin user
     async with async_session_factory() as db:
         try:
             user = await AuthService.create_user(
