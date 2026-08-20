@@ -12,21 +12,15 @@ async def create_admin(email: str, password: str, name: str) -> None:
     from app.models.user import UserRole
     from app.services.auth_service import AuthService
 
-    # Ensure tables and enum values exist in postgres
+    # Ensure tables exist and alter enum columns to standard VARCHAR
     async with engine.begin() as conn:
-        for val in ["super_admin", "SUPER_ADMIN", "teacher", "TEACHER", "assistant", "ASSISTANT"]:
+        for query in [
+            "ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50) USING role::text;",
+            "ALTER TABLE messages ALTER COLUMN role TYPE VARCHAR(50) USING role::text;",
+            "ALTER TABLE references ALTER COLUMN status TYPE VARCHAR(50) USING status::text;",
+        ]:
             try:
-                await conn.execute(text(f"ALTER TYPE user_role ADD VALUE IF NOT EXISTS '{val}'"))
-            except Exception:
-                pass
-        for val in ["student", "STUDENT", "assistant", "ASSISTANT", "system", "SYSTEM"]:
-            try:
-                await conn.execute(text(f"ALTER TYPE message_role ADD VALUE IF NOT EXISTS '{val}'"))
-            except Exception:
-                pass
-        for val in ["pending", "PENDING", "processing", "PROCESSING", "ready", "READY", "failed", "FAILED"]:
-            try:
-                await conn.execute(text(f"ALTER TYPE reference_status ADD VALUE IF NOT EXISTS '{val}'"))
+                await conn.execute(text(query))
             except Exception:
                 pass
         await conn.run_sync(Base.metadata.create_all)

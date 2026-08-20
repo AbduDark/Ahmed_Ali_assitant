@@ -23,10 +23,7 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(255))
-    role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_role", values_callable=lambda x: [e.value for e in x]),
-        default=UserRole.TEACHER,
-    )
+    role: Mapped[str] = mapped_column(String(50), default=UserRole.TEACHER.value)
     is_active: Mapped[bool] = mapped_column(default=True)
 
     # Relationships
@@ -38,7 +35,7 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<User {self.email} role={self.role.value}>"
+        return f"<User {self.email} role={self.role}>"
 
 
 # Avoid circular import — these are imported at runtime by SQLAlchemy

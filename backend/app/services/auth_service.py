@@ -34,7 +34,8 @@ class AuthService:
         if not user.is_active:
             raise InvalidCredentialsError()
 
-        access_token = create_access_token(user.id, user.role.value)
+        role_val = user.role.value if hasattr(user.role, "value") else str(user.role)
+        access_token = create_access_token(user.id, role_val)
         refresh_token = create_refresh_token(user.id)
 
         return TokenResponse(
@@ -64,7 +65,8 @@ class AuthService:
         if not user or not user.is_active:
             raise InvalidCredentialsError()
 
-        access_token = create_access_token(user.id, user.role.value)
+        role_val = user.role.value if hasattr(user.role, "value") else str(user.role)
+        access_token = create_access_token(user.id, role_val)
         new_refresh_token = create_refresh_token(user.id)
 
         return TokenResponse(
@@ -88,16 +90,17 @@ class AuthService:
         email: str,
         password: str,
         name: str,
-        role: UserRole,
+        role: UserRole | str,
         db: AsyncSession,
     ) -> User:
         """Create a new user (for admin scripts)."""
         hashed = hash_password(password)
+        role_str = role.value if hasattr(role, "value") else str(role)
         user = User(
             email=email,
             hashed_password=hashed,
             name=name,
-            role=role,
+            role=role_str,
         )
         db.add(user)
         await db.flush()

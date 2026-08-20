@@ -51,9 +51,7 @@ class Message(Base, TimestampMixin):
     conversation_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("conversations.id"), index=True,
     )
-    role: Mapped[MessageRole] = mapped_column(
-        Enum(MessageRole, name="message_role", values_callable=lambda x: [e.value for e in x])
-    )
+    role: Mapped[str] = mapped_column(String(50), default="student")
     content: Mapped[str] = mapped_column(Text)
 
     # RAG metadata (only for assistant messages)

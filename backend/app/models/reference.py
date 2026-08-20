@@ -50,9 +50,9 @@ class Reference(Base, TimestampMixin, SoftDeleteMixin):
     # Metadata
     language: Mapped[str] = mapped_column(String(10), default="ar")
     academic_year: Mapped[str | None] = mapped_column(String(20), default=None)
-    status: Mapped[ReferenceStatus] = mapped_column(
-        Enum(ReferenceStatus, name="reference_status", values_callable=lambda x: [e.value for e in x]),
-        default=ReferenceStatus.PENDING,
+    status: Mapped[str] = mapped_column(
+        String(50),
+        default=ReferenceStatus.PENDING.value,
         index=True,
     )
     page_count: Mapped[int | None] = mapped_column(Integer, default=None)
