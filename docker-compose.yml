@@ -95,8 +95,8 @@ services:
       DOMAIN_NAME: ${DOMAIN_NAME:-assistant.192.99.144.235.nip.io}
       SSL_EMAIL: ${SSL_EMAIL:-admin@assistant.192.99.144.235.nip.io}
     ports:
-      - "${HTTP_PORT:-8080}:80"
-      - "${HTTPS_PORT:-8443}:443"
+      - "${HTTP_PORT:-8095}:80"
+      - "${HTTPS_PORT:-8495}:443"
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
