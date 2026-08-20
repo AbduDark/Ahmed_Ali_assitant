@@ -92,11 +92,11 @@ services:
     container_name: teacher_ai_nginx
     restart: unless-stopped
     environment:
-      DOMAIN_NAME: 192.99.144.235.nip.io
-      SSL_EMAIL: admin@192.99.144.235.nip.io
+      DOMAIN_NAME: ${DOMAIN_NAME:-assistant.192.99.144.235.nip.io}
+      SSL_EMAIL: ${SSL_EMAIL:-admin@assistant.192.99.144.235.nip.io}
     ports:
-      - "80:80"
-      - "443:443"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot

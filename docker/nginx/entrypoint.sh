@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-DOMAIN="${DOMAIN_NAME:-192.99.144.235.nip.io}"
-EMAIL="${SSL_EMAIL:-admin@192.99.144.235.nip.io}"
+DOMAIN="${DOMAIN_NAME:-assistant.192.99.144.235.nip.io}"
+EMAIL="${SSL_EMAIL:-admin@assistant.192.99.144.235.nip.io}"
 
 echo "========================================================"
 echo "🔐 Starting Nginx with Automated SSL for: $DOMAIN"
