@@ -32,8 +32,12 @@ api.interceptors.response.use(
 // ── Auth ─────────────────────────────────────────────────────
 
 export const authApi = {
-  login: (email: string, password: string) =>
-    api.post('/auth/login', { email, password }),
+  login: (emailOrPayload: string | { email: string; password: string }, password?: string) => {
+    const payload = typeof emailOrPayload === 'string'
+      ? { email: emailOrPayload, password: password || '' }
+      : emailOrPayload;
+    return api.post('/auth/login', payload);
+  },
   refresh: (refreshToken: string) =>
     api.post('/auth/refresh', { refresh_token: refreshToken }),
   me: () => api.get('/auth/me'),
