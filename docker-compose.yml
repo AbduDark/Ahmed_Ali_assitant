@@ -84,22 +84,15 @@ services:
     container_name: teacher_ai_frontend
     restart: unless-stopped
 
-  # ── Nginx (Reverse Proxy with Automated SSL) ──────────────
+  # ── Nginx (Reverse Proxy) ────────────────────────────────
   nginx:
     build:
       context: ./docker/nginx
       dockerfile: Dockerfile
     container_name: teacher_ai_nginx
     restart: unless-stopped
-    environment:
-      DOMAIN_NAME: ${DOMAIN_NAME:-assistant.192.99.144.235.nip.io}
-      SSL_EMAIL: ${SSL_EMAIL:-admin@assistant.192.99.144.235.nip.io}
     ports:
       - "${HTTP_PORT:-8095}:80"
-      - "${HTTPS_PORT:-8495}:443"
-    volumes:
-      - certbot_conf:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
     depends_on:
       - backend
       - frontend
@@ -107,5 +100,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  certbot_conf:
-  certbot_www:
