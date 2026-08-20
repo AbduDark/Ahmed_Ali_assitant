@@ -43,16 +43,26 @@ async def create_reference(
 
     reference = await ReferenceService.create_reference(data, file, user_id, db)
 
-    # Enqueue document processing job if file was uploaded
-    if reference.file_path:
+    # Enqueue document processing job if file or URL was provided
+    if reference.file_path or reference.source_url:
         try:
             from app.dependencies import _redis_pool
             if _redis_pool:
                 from arq import ArqRedis
                 redis: ArqRedis = _redis_pool  # type: ignore
                 await redis.enqueue_job("process_document", reference.id)
+            else:
+                # Direct background execution fallback
+                import asyncio
+                from app.document.processor import DocumentProcessor
+                from app.database import async_session_factory
+                async def _bg_task(ref_id: str):
+                    async with async_session_factory() as s:
+                        p = DocumentProcessor()
+                        await p.process_reference(ref_id, s)
+                asyncio.create_task(_bg_task(reference.id))
         except Exception:
-            pass  # Processing will need to be triggered manually
+            pass
 
     return ReferenceResponse.model_validate(reference)
 

@@ -145,7 +145,11 @@ class DocumentProcessor:
     async def _extract_text(
         self, reference: Reference
     ) -> list[tuple[int, str]]:
-        """Extract text based on file type. Returns list of (page_num, text)."""
+        """Extract text based on file type or source_url. Returns list of (page_num, text)."""
+        # If source_url is provided and no local file
+        if reference.source_url and not reference.file_path:
+            return await self._extract_url(reference.source_url)
+
         if not reference.file_path:
             return []
 
@@ -175,6 +179,50 @@ class DocumentProcessor:
 
         else:
             raise ValueError(f"Unsupported file type: {file_ext}")
+
+    async def _extract_url(self, url: str) -> list[tuple[int, str]]:
+        """Extract clean text content from a web URL / article."""
+        import httpx
+        from bs4 import BeautifulSoup
+
+        logger.info(f"Fetching web reference from URL: {url}")
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "ar,en;q=0.9",
+        }
+
+        async with httpx.AsyncClient(timeout=25.0, follow_redirects=True) as client:
+            resp = await client.get(url, headers=headers)
+            resp.raise_for_status()
+            html = resp.text
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        # Remove irrelevant and non-content elements
+        for tag in soup(["script", "style", "nav", "footer", "header", "aside", "noscript", "svg", "button", "iframe", "form"]):
+            tag.decompose()
+
+        # Try to find main article or content area
+        main_content = (
+            soup.find("article")
+            or soup.find("main")
+            or soup.find("div", class_=lambda c: c and any(k in c.lower() for k in ("content", "article", "post", "entry", "body")))
+            or soup.body
+            or soup
+        )
+
+        text = main_content.get_text(separator="\n")
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        cleaned = "\n".join(lines)
+
+        if not cleaned:
+            raise ValueError(f"Could not extract meaningful text from URL: {url}")
+
+        logger.info(f"Successfully extracted {len(cleaned)} characters from URL: {url}")
+        return [(1, cleaned)]
 
     async def _extract_docx(self, file_path: Path) -> list[tuple[int, str]]:
         """Extract text from DOCX files."""

@@ -13,6 +13,9 @@ import {
   Plus,
   X,
   FileUp,
+  Globe,
+  ExternalLink,
+  Link2,
 } from 'lucide-react';
 
 const statusConfig: Record<string, { label: string; chipClass: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -26,7 +29,9 @@ export default function ReferencesPage() {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
   const [title, setTitle] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -41,6 +46,7 @@ export default function ReferencesPage() {
       queryClient.invalidateQueries({ queryKey: ['references'] });
       setShowUpload(false);
       setTitle('');
+      setSourceUrl('');
       setSelectedFileName(null);
     },
   });
@@ -60,7 +66,6 @@ export default function ReferencesPage() {
     if (file) {
       setSelectedFileName(file.name);
       if (!title) {
-        // Strip extension as default title
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
       }
     }
@@ -68,12 +73,19 @@ export default function ReferencesPage() {
 
   const handleUpload = (e: FormEvent) => {
     e.preventDefault();
-    const file = fileRef.current?.files?.[0];
     if (!title) return;
 
     const formData = new FormData();
     formData.append('title', title);
-    if (file) formData.append('file', file);
+
+    if (uploadMode === 'file') {
+      const file = fileRef.current?.files?.[0];
+      if (file) formData.append('file', file);
+    } else {
+      if (!sourceUrl) return;
+      formData.append('source_url', sourceUrl);
+    }
+
     uploadMutation.mutate(formData);
   };
 
@@ -86,7 +98,7 @@ export default function ReferencesPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-white">بنك المراجع والكتب المعتمدة</h1>
           <p className="text-sm text-slate-400 mt-1">
-            رفع الكتب والمذكرات الدراسية ليقوم الذكاء الاصطناعي باستخراج الإجابات منها حصراً
+            إضافة الكتب والمذكرات أو الروابط والمقالات التعليمية ليقوم الذكاء الاصطناعي بالاعتماد عليها
           </p>
         </div>
         <button
@@ -98,16 +110,16 @@ export default function ReferencesPage() {
         </button>
       </div>
 
-      {/* ── Upload Modal ───────────────────────────────────── */}
+      {/* ── Upload / Add URL Modal ──────────────────────────── */}
       {showUpload && (
         <div className="modal-backdrop">
           <div className="modal-content">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
                   <Upload className="w-4 h-4" />
                 </div>
-                <h3 className="text-lg font-bold text-white">رفع مرجع دراسي جديد</h3>
+                <h3 className="text-lg font-bold text-white">إضافة مرجع دراسي جديد</h3>
               </div>
               <button
                 onClick={() => setShowUpload(false)}
@@ -117,50 +129,106 @@ export default function ReferencesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleUpload} className="space-y-5">
+            {/* Mode Tabs (File vs URL) */}
+            <div className="flex rounded-xl bg-slate-900/80 p-1 border border-slate-800 mb-5">
+              <button
+                type="button"
+                onClick={() => setUploadMode('file')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                  uploadMode === 'file'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>رفع ملف (PDF / Word)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadMode('url')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                  uploadMode === 'url'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>رابط موقع / مقال ويب (URL)</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleUpload} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                  عنوان المرجع أو الكتاب *
+                  عنوان المرجع أو المقال *
                 </label>
                 <input
                   className="input-pro"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="مثال: كتاب التاريخ للثانوية العامة - الفصل الدراسي الأول"
+                  placeholder={
+                    uploadMode === 'file'
+                      ? 'مثال: كتاب التاريخ للثانوية العامة - الفصل الأول'
+                      : 'مثال: مقال تاريخي عن معركة حطين وسقوط بيت المقدس'
+                  }
                   required
                 />
               </div>
 
-              {/* Drag & Drop File Zone */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                  الملف الدراسي (PDF, DOCX, TXT, PPTX)
-                </label>
-                <div
-                  onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-900/40 hover:bg-indigo-500/5"
-                >
-                  <input
-                    type="file"
-                    ref={fileRef}
-                    onChange={handleFileChange}
-                    accept=".pdf,.docx,.txt,.md,.pptx"
-                    className="hidden"
-                  />
-                  <FileUp className="w-10 h-10 text-indigo-400 mx-auto mb-3" />
-                  {selectedFileName ? (
-                    <div className="font-bold text-sm text-emerald-400 flex items-center justify-center gap-2">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>{selectedFileName}</span>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-sm font-bold text-white mb-1">اضغط هنا لاختيار الملف أو اسحبه إلى هنا</p>
-                      <p className="text-xs text-slate-400">يدعم ملفات PDF، Word، Text، PowerPoint بحد أقصى 100 ميجابايت</p>
-                    </>
-                  )}
+              {uploadMode === 'file' ? (
+                /* Drag & Drop File Zone */
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                    الملف الدراسي (PDF, DOCX, TXT, PPTX)
+                  </label>
+                  <div
+                    onClick={() => fileRef.current?.click()}
+                    className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-900/40 hover:bg-indigo-500/5"
+                  >
+                    <input
+                      type="file"
+                      ref={fileRef}
+                      onChange={handleFileChange}
+                      accept=".pdf,.docx,.txt,.md,.pptx"
+                      className="hidden"
+                    />
+                    <FileUp className="w-10 h-10 text-indigo-400 mx-auto mb-2" />
+                    {selectedFileName ? (
+                      <div className="font-bold text-sm text-emerald-400 flex items-center justify-center gap-2">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>{selectedFileName}</span>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-bold text-white mb-1">اضغط لاختيار الملف أو اسحبه هنا</p>
+                        <p className="text-xs text-slate-400">PDF, Word, Text, PowerPoint بحد أقصى 100MB</p>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* URL Input */
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                    رابط الصفحة أو المقال التعليمي (URL) *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      className="input-pro text-left ltr pl-10"
+                      value={sourceUrl}
+                      onChange={(e) => setSourceUrl(e.target.value)}
+                      placeholder="https://example.com/history/article"
+                      required
+                      dir="ltr"
+                    />
+                    <Globe className="w-4 h-4 text-cyan-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                    💡 سيقوم الذكاء الاصطناعي بزيارة الرابط واستخراج محتواه وفهرسته تلقائياً في قاعدة المعرفة.
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
                 <button
@@ -175,7 +243,9 @@ export default function ReferencesPage() {
                   className="btn-pro btn-pro-primary"
                   disabled={uploadMutation.isPending}
                 >
-                  {uploadMutation.isPending ? 'جاري رفع وفهرسة الملف...' : 'رفع وفهرسة الآن'}
+                  {uploadMutation.isPending
+                    ? uploadMode === 'url' ? 'جاري جلب وفهرسة الرابط...' : 'جاري رفع وفهرسة الملف...'
+                    : uploadMode === 'url' ? 'جلب وفهرسة الرابط' : 'رفع وفهرسة الآن'}
                 </button>
               </div>
             </form>
@@ -188,23 +258,23 @@ export default function ReferencesPage() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="w-10 h-10 rounded-full border-4 border-slate-700 border-t-emerald-500 animate-spin" />
-            <p className="text-xs text-slate-400 font-medium">جاري فحص المراجع المفهرسة...</p>
+            <p className="text-xs text-slate-400 font-medium">جاري فحص المراجع والمصادر...</p>
           </div>
         ) : !references.length ? (
           <div className="text-center py-16 px-4">
             <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-4">
               <BookOpen className="w-8 h-8" />
             </div>
-            <h3 className="text-base font-bold text-white mb-1">لا توجد مراجع مرفوعة بعد</h3>
+            <h3 className="text-base font-bold text-white mb-1">لا توجد مراجع أو روابط مضافة بعد</h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto mb-6">
-              قم برفع الكتب والمذكرات الدراسية حتى يعتمد عليها البوت في إجاباته للطلاب.
+              قم برفع الكتب والمذكرات أو إضافة روابط المقالات التعليمية ليعتمد عليها البوت في إجاباته.
             </p>
             <button
               onClick={() => setShowUpload(true)}
               className="btn-pro btn-pro-primary"
             >
               <Plus className="w-4 h-4" />
-              <span>رفع أول كتاب الآن</span>
+              <span>إضافة أول مرجع الآن</span>
             </button>
           </div>
         ) : (
@@ -212,11 +282,11 @@ export default function ReferencesPage() {
             <table className="pro-table">
               <thead>
                 <tr>
-                  <th>اسم المرجع / الكتاب</th>
-                  <th>صيغة الملف</th>
+                  <th>اسم المرجع / المقال</th>
+                  <th>نوع المصدر</th>
                   <th>حالة الفهرسة</th>
-                  <th>الأجزاء المفهرسة (Chunks)</th>
-                  <th>تاريخ الرفع</th>
+                  <th>الأجزاء المفهرسة</th>
+                  <th>تاريخ الإضافة</th>
                   <th className="text-left">الإجراءات</th>
                 </tr>
               </thead>
@@ -225,23 +295,41 @@ export default function ReferencesPage() {
                   const statusKey = (ref.status as string) || 'ready';
                   const conf = statusConfig[statusKey] || statusConfig.ready;
                   const StatusIcon = conf.icon;
+                  const isUrl = !!ref.source_url;
 
                   return (
                     <tr key={ref.id as string}>
                       <td>
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-                            <FileText className="w-4 h-4" />
+                          <div className={`w-9 h-9 rounded-xl border flex items-center justify-center flex-shrink-0 ${
+                            isUrl
+                              ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+                              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                          }`}>
+                            {isUrl ? <Globe className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                           </div>
-                          <div>
-                            <div className="font-bold text-white text-sm">{ref.title as string}</div>
-                            <div className="text-[11px] text-slate-400">ID: {ref.id as string}</div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-white text-sm truncate">{ref.title as string}</div>
+                            {isUrl && ref.source_url ? (
+                              <a
+                                href={ref.source_url as string}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 mt-0.5 truncate max-w-xs"
+                                dir="ltr"
+                              >
+                                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{ref.source_url as string}</span>
+                              </a>
+                            ) : (
+                              <div className="text-[11px] text-slate-400">ملف دراسي محلي</div>
+                            )}
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span className="chip chip-indigo uppercase text-[11px]">
-                          {(ref.file_type as string)?.toUpperCase() || 'PDF'}
+                        <span className={`chip uppercase text-[11px] ${isUrl ? 'chip-cyan' : 'chip-indigo'}`}>
+                          {isUrl ? 'رابط ويب (URL)' : ((ref.file_type as string)?.toUpperCase() || 'PDF')}
                         </span>
                       </td>
                       <td>
