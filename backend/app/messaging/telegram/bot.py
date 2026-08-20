@@ -76,17 +76,27 @@ class TelegramBot(MessagingProvider):
 
         if settings.telegram_use_polling:
             logger.info("Starting Telegram bot in polling mode")
+            try:
+                await self._bot.delete_webhook(drop_pending_updates=False)
+            except Exception as e:
+                logger.warning(f"Error removing webhook for polling: {e}")
             await self._app.start()
-            await self._app.updater.start_polling(drop_pending_updates=True)
+            if self._app.updater:
+                await self._app.updater.start_polling(drop_pending_updates=True)
         else:
             # Webhook mode — set webhook URL
-            webhook_url = f"{settings.telegram_webhook_url}/webhooks/telegram/{settings.telegram_webhook_secret}"
+            base_url = settings.telegram_webhook_url.rstrip('/')
+            webhook_url = f"{base_url}/webhooks/telegram/{settings.telegram_webhook_secret}"
             await self._app.start()
-            await self._bot.set_webhook(
-                url=webhook_url,
-                secret_token=settings.telegram_webhook_secret,
-            )
-            logger.info(f"Telegram webhook set: {webhook_url}")
+            try:
+                await self._bot.set_webhook(
+                    url=webhook_url,
+                    secret_token=settings.telegram_webhook_secret,
+                    drop_pending_updates=False,
+                )
+                logger.info(f"Telegram webhook set: {webhook_url}")
+            except Exception as e:
+                logger.warning(f"Failed to register Telegram webhook: {e}")
 
     async def stop(self) -> None:
         """Stop the bot gracefully."""
