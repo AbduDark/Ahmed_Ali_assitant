@@ -2,6 +2,7 @@
 
 import asyncio
 import sys
+from sqlalchemy import text
 from app.core.logging import setup_logging
 
 
@@ -11,8 +12,23 @@ async def create_admin(email: str, password: str, name: str) -> None:
     from app.models.user import UserRole
     from app.services.auth_service import AuthService
 
-    # Ensure tables exist
+    # Ensure tables and enum values exist in postgres
     async with engine.begin() as conn:
+        for val in ["super_admin", "SUPER_ADMIN", "teacher", "TEACHER", "assistant", "ASSISTANT"]:
+            try:
+                await conn.execute(text(f"ALTER TYPE user_role ADD VALUE IF NOT EXISTS '{val}'"))
+            except Exception:
+                pass
+        for val in ["student", "STUDENT", "assistant", "ASSISTANT", "system", "SYSTEM"]:
+            try:
+                await conn.execute(text(f"ALTER TYPE message_role ADD VALUE IF NOT EXISTS '{val}'"))
+            except Exception:
+                pass
+        for val in ["pending", "PENDING", "processing", "PROCESSING", "ready", "READY", "failed", "FAILED"]:
+            try:
+                await conn.execute(text(f"ALTER TYPE reference_status ADD VALUE IF NOT EXISTS '{val}'"))
+            except Exception:
+                pass
         await conn.run_sync(Base.metadata.create_all)
 
     async with async_session_factory() as db:
@@ -26,10 +42,10 @@ async def create_admin(email: str, password: str, name: str) -> None:
             )
             await db.commit()
             print("\n" + "=" * 50)
-            print("✅ Admin user created successfully!")
+            print("🎉 Admin user created successfully!")
             print(f"   Email: {email}")
             print(f"   Name: {name}")
-            print("   Role: SUPER_ADMIN")
+            print(f"   Role: {user.role.value if hasattr(user.role, 'value') else user.role}")
             print(f"   ID: {user.id}")
             print("=" * 50 + "\n")
         except Exception as e:
