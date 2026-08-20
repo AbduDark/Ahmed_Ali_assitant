@@ -24,7 +24,7 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     hashed_password: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(255))
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_role"),
+        Enum(UserRole, name="user_role", values_callable=lambda x: [e.value for e in x]),
         default=UserRole.TEACHER,
     )
     is_active: Mapped[bool] = mapped_column(default=True)

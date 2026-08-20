@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 
-from sqlalchemy import MetaData, func
+from sqlalchemy import DateTime, MetaData, func
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
     AsyncSession,
@@ -39,10 +39,12 @@ class TimestampMixin:
     """Adds created_at and updated_at columns."""
 
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         server_default=func.now(),
     )
     updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
         default=None,
         onupdate=lambda: datetime.now(timezone.utc),
     )
@@ -51,7 +53,10 @@ class TimestampMixin:
 class SoftDeleteMixin:
     """Adds soft-delete support via deleted_at column."""
 
-    deleted_at: Mapped[datetime | None] = mapped_column(default=None)
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        default=None,
+    )
 
     @property
     def is_deleted(self) -> bool:
