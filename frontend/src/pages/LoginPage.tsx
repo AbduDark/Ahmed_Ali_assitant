@@ -1,7 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import React, { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/services/api';
-import { GraduationCap, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, Loader2, Sparkles, Lock, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -22,145 +22,113 @@ export default function LoginPage() {
       localStorage.setItem('refresh_token', res.data.refresh_token);
       navigate('/', { replace: true });
     } catch {
-      setError('بيانات الدخول غير صحيحة');
+      setError('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page">
-      {/* Background decoration */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '20%',
-          right: '10%',
-          width: 300,
-          height: 300,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '20%',
-          left: '15%',
-          width: 250,
-          height: 250,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-        }}
-      />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-950">
+      {/* Dynamic Animated Ambient Glows */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="login-card animate-fade-in">
-        <div className="login-logo">
-          <div
-            className="gradient-primary"
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 'var(--radius)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1rem',
-            }}
-          >
-            <GraduationCap size={32} color="white" />
+      {/* Main Glassmorphic Card */}
+      <div className="w-full max-w-md relative z-10 glass-panel p-8 sm:p-10 shadow-2xl border border-white/10 animate-page">
+        {/* Brand & Badge */}
+        <div className="text-center space-y-3 mb-8">
+          <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 shadow-lg shadow-indigo-500/30 border border-white/20">
+            <GraduationCap className="w-8 h-8 text-white" />
           </div>
-          <h1>المساعد التعليمي الذكي</h1>
-          <p>تسجيل دخول لوحة التحكم</p>
+          <div>
+            <div className="flex items-center justify-center gap-1.5">
+              <h1 className="text-2xl font-extrabold text-white tracking-wide">الجنرال AI</h1>
+              <Sparkles className="w-4 h-4 text-amber-400" />
+            </div>
+            <p className="text-xs font-medium text-slate-400 mt-1">منصة الذكاء الاصطناعي لمادة التاريخ والجغرافيا</p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">البريد الإلكتروني</label>
-            <input
-              id="email"
-              type="email"
-              className="form-input"
-              placeholder="admin@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              dir="ltr"
-            />
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2" htmlFor="email">
+              البريد الإلكتروني
+            </label>
+            <div className="relative">
+              <input
+                id="email"
+                type="email"
+                className="input-pro text-left ltr"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                dir="ltr"
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">كلمة المرور</label>
-            <div style={{ position: 'relative' }}>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2" htmlFor="password">
+              كلمة المرور
+            </label>
+            <div className="relative">
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                className="form-input"
+                className="input-pro text-left ltr pl-11"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 dir="ltr"
-                style={{ paddingLeft: '3rem' }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  left: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--color-text-muted)',
-                  cursor: 'pointer',
-                }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors p-1"
+                tabIndex={-1}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           {error && (
-            <div
-              style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '0.75rem 1rem',
-                color: 'var(--color-danger)',
-                fontSize: '0.875rem',
-                marginBottom: '1rem',
-              }}
-            >
-              {error}
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+              <span>{error}</span>
             </div>
           )}
 
           <button
             type="submit"
-            className="btn btn-primary"
+            className="w-full btn-pro btn-pro-primary py-3 text-sm font-bold shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
             disabled={loading}
-            style={{ width: '100%', padding: '0.875rem', fontSize: '1rem' }}
           >
             {loading ? (
-              <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>جاري التحقق...</span>
+              </>
             ) : (
-              'تسجيل الدخول'
+              <>
+                <Lock className="w-4 h-4" />
+                <span>تسجيل الدخول للوحة التحكم</span>
+              </>
             )}
           </button>
         </form>
-      </div>
 
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+        {/* Security Note */}
+        <div className="mt-8 pt-6 border-t border-slate-800/80 flex items-center justify-center gap-2 text-xs text-slate-400">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>اتصال مشفر وآمن عبر سيرفرات معتمدة</span>
+        </div>
+      </div>
     </div>
   );
 }

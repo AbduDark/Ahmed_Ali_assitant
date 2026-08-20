@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from telegram import Bot
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, MessageHandler, filters
 
 from app.config import settings
 from app.core.logging import get_logger
 from app.messaging.base import MessagingProvider
 from app.messaging.telegram.handlers import (
+    callback_query_handler,
     cancel_handler,
     help_handler,
     message_handler,
@@ -58,6 +59,9 @@ class TelegramBot(MessagingProvider):
         self._app.add_handler(CommandHandler("help", help_handler))
         self._app.add_handler(CommandHandler("subjects", subjects_handler))
         self._app.add_handler(CommandHandler("cancel", cancel_handler))
+
+        # Inline button callbacks
+        self._app.add_handler(CallbackQueryHandler(callback_query_handler))
 
         # Text message handler (must be last)
         self._app.add_handler(

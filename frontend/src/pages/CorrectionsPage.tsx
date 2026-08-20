@@ -1,7 +1,7 @@
+import React, { useState, type FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { correctionsApi } from '@/services/api';
-import { CheckCircle, Plus, Trash2 } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { CheckCircle, Plus, Trash2, X, AlertTriangle, ShieldCheck, HelpCircle } from 'lucide-react';
 
 export default function CorrectionsPage() {
   const queryClient = useQueryClient();
@@ -39,76 +39,165 @@ export default function CorrectionsPage() {
     createMutation.mutate({ question, correct_answer: correctAnswer, bad_answer: badAnswer || undefined });
   };
 
+  const corrections = (data as Record<string, unknown>[]) || [];
+
   return (
-    <div>
-      <div className="page-header">
+    <div className="space-y-6 animate-page">
+      {/* ── Header ────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="page-title">تصحيحات المدرس</h1>
-          <p className="page-subtitle">تصحيح إجابات المساعد وإضافة إجابات معتمدة</p>
+          <h1 className="text-2xl font-extrabold text-white">قاعدة تصحيحات المدرس</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            تصحيح الأسئلة الشائعة وتثبيت إجابات نموذجية معتمدة لها أولوية قصوى على الذكاء الاصطناعي
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(!showAdd)}>
-          <Plus size={18} /> إضافة تصحيح
+        <button className="btn-pro btn-pro-primary" onClick={() => setShowAdd(true)}>
+          <Plus className="w-4 h-4" />
+          <span>إضافة تصحيح معتمد</span>
         </button>
       </div>
 
+      {/* ── Add Modal ──────────────────────────────────────── */}
       {showAdd && (
-        <div className="card animate-fade-in" style={{ marginBottom: '1.5rem' }}>
-          <form onSubmit={handleCreate}>
-            <div className="form-group">
-              <label className="form-label">السؤال *</label>
-              <textarea className="form-input form-textarea" style={{ minHeight: 80 }} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="السؤال الذي أجاب عنه المساعد بشكل خاطئ" required />
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4" />
+                </div>
+                <h3 className="text-lg font-bold text-white">إضافة تصحيح وإجابة معتمدة</h3>
+              </div>
+              <button
+                onClick={() => setShowAdd(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="form-group">
-              <label className="form-label">الإجابة الخاطئة (اختياري)</label>
-              <textarea className="form-input form-textarea" style={{ minHeight: 80 }} value={badAnswer} onChange={(e) => setBadAnswer(e.target.value)} placeholder="الإجابة الخاطئة التي قدمها المساعد" />
-            </div>
-            <div className="form-group">
-              <label className="form-label">الإجابة الصحيحة *</label>
-              <textarea className="form-input form-textarea" style={{ minHeight: 80 }} value={correctAnswer} onChange={(e) => setCorrectAnswer(e.target.value)} placeholder="الإجابة الصحيحة المعتمدة" required />
-            </div>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button type="submit" className="btn btn-primary">حفظ</button>
-              <button type="button" className="btn btn-secondary" onClick={() => setShowAdd(false)}>إلغاء</button>
-            </div>
-          </form>
+
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                  السؤال أو المسألة *
+                </label>
+                <textarea
+                  className="input-pro min-h-[70px] resize-y"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="مثال: ما هي أسباب فشل الحملة الفرنسية على بلاد الشام؟"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                  الإجابة الخاطئة أو غير الدقيقة (اختياري)
+                </label>
+                <textarea
+                  className="input-pro min-h-[70px] resize-y"
+                  value={badAnswer}
+                  onChange={(e) => setBadAnswer(e.target.value)}
+                  placeholder="الإجابة التي قدمها البوت وتريد تصحيحها..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">
+                  الإجابة النموذجية المعتمدة *
+                </label>
+                <textarea
+                  className="input-pro min-h-[100px] resize-y border-emerald-500/40 focus:border-emerald-400"
+                  value={correctAnswer}
+                  onChange={(e) => setCorrectAnswer(e.target.value)}
+                  placeholder="اكتب الإجابة الدقيقة وفقاً للمنهج والامتحانات..."
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  className="btn-pro btn-pro-glass"
+                  onClick={() => setShowAdd(false)}
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  className="btn-pro btn-pro-primary"
+                  disabled={createMutation.isPending}
+                >
+                  {createMutation.isPending ? 'جاري الحفظ...' : 'حفظ التصحيح المعتمد'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
+      {/* ── Corrections List ───────────────────────────────── */}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>جاري التحميل...</div>
-      ) : !(data as unknown[])?.length ? (
-        <div className="card">
-          <div className="empty-state">
-            <CheckCircle size={64} />
-            <h3>لا توجد تصحيحات</h3>
-            <p>أضف تصحيحات لتحسين دقة إجابات المساعد</p>
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <div className="w-10 h-10 rounded-full border-4 border-slate-700 border-t-emerald-500 animate-spin" />
+          <p className="text-xs text-slate-400 font-medium">جاري فحص قاعدة التصحيحات...</p>
+        </div>
+      ) : !corrections.length ? (
+        <div className="glass-panel text-center py-16 px-4">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-4">
+            <ShieldCheck className="w-8 h-8" />
           </div>
+          <h3 className="text-base font-bold text-white mb-1">لا توجد تصحيحات مضافة</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-6">
+            يمكنك إضافة إجابات نموذجية للأسئلة الشائعة ليتم الرد بها تلقائياً للطلاب.
+          </p>
+          <button onClick={() => setShowAdd(true)} className="btn-pro btn-pro-primary">
+            <Plus className="w-4 h-4" />
+            <span>إضافة أول تصحيح معتمد</span>
+          </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: '0.75rem' }}>
-          {(data as Record<string, unknown>[]).map((corr) => (
-            <div key={corr.id as string} className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, marginBottom: '0.75rem' }}>❓ {corr.question as string}</div>
-                  {corr.bad_answer ? (
-                    <div style={{ marginBottom: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(239,68,68,0.08)', borderRadius: 'var(--radius-sm)', borderRight: '3px solid var(--color-danger)' }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 600, marginBottom: '0.25rem' }}>❌ الإجابة الخاطئة:</div>
-                      <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{corr.bad_answer as string}</div>
-                    </div>
-                  ) : null}
-                  <div style={{ padding: '0.5rem 0.75rem', background: 'rgba(16,185,129,0.08)', borderRadius: 'var(--radius-sm)', borderRight: '3px solid var(--color-success)' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '0.25rem' }}>✅ الإجابة الصحيحة:</div>
-                    <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{corr.correct_answer as string}</div>
+        <div className="space-y-4">
+          {corrections.map((corr) => (
+            <div key={corr.id as string} className="glass-card p-6 border border-slate-800/80">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 flex-shrink-0">
+                    <HelpCircle className="w-4 h-4" />
                   </div>
+                  <h3 className="font-bold text-sm sm:text-base text-white leading-snug">
+                    {corr.question as string}
+                  </h3>
                 </div>
                 <button
-                  className="btn btn-danger"
-                  style={{ padding: '0.375rem', flexShrink: 0, marginRight: '1rem' }}
-                  onClick={() => { if (confirm('حذف هذا التصحيح؟')) deleteMutation.mutate(corr.id as string); }}
+                  className="btn-pro btn-pro-danger p-1.5 rounded-lg flex-shrink-0"
+                  onClick={() => {
+                    if (confirm('حذف هذا التصحيح؟')) deleteMutation.mutate(corr.id as string);
+                  }}
+                  title="حذف"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {corr.bad_answer ? (
+                  <div className="p-3.5 rounded-xl bg-rose-500/5 border border-rose-500/20 text-xs">
+                    <div className="font-bold text-rose-400 flex items-center gap-1.5 mb-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <span>الإجابة غير الدقيقة:</span>
+                    </div>
+                    <p className="text-slate-300 leading-relaxed">{corr.bad_answer as string}</p>
+                  </div>
+                ) : null}
+
+                <div className="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-xs md:col-span-1">
+                  <div className="font-bold text-emerald-400 flex items-center gap-1.5 mb-1.5">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    <span>الإجابة النموذجية المعتمدة:</span>
+                  </div>
+                  <p className="text-slate-200 leading-relaxed font-medium">{corr.correct_answer as string}</p>
+                </div>
               </div>
             </div>
           ))}
