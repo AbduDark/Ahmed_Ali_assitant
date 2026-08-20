@@ -74,17 +74,22 @@ class HybridRetriever:
         top_k = top_k or settings.rag_top_k
         threshold = similarity_threshold or settings.rag_similarity_threshold
 
-        # Generate query embedding
-        query_embedding = await self.embedding_service.embed_query(query)
-
-        # Run both searches
-        vector_results = await self._vector_search(
-            query_embedding, db,
-            top_k=top_k * 2,  # Get more candidates for RRF
-            subject_id=subject_id,
-            unit_id=unit_id,
-            lesson_id=lesson_id,
-        )
+        # Run searches
+        if self.embedding_service.provider is not None:
+            query_embedding = await self.embedding_service.embed_query(query)
+            vector_results = await self._vector_search(
+                query_embedding, db,
+                top_k=top_k * 2,
+                subject_id=subject_id,
+                unit_id=unit_id,
+                lesson_id=lesson_id,
+            )
+            corrections = await self._find_corrections(
+                query_embedding, db, top_k=3
+            )
+        else:
+            vector_results = []
+            corrections = []
 
         keyword_results = await self._keyword_search(
             query, db,
@@ -94,19 +99,17 @@ class HybridRetriever:
             lesson_id=lesson_id,
         )
 
-        # Merge with RRF
-        merged = self._reciprocal_rank_fusion(vector_results, keyword_results)
+        # Merge with RRF if we have vector results, else use keyword results
+        if vector_results:
+            merged = self._reciprocal_rank_fusion(vector_results, keyword_results)
+        else:
+            merged = keyword_results
 
         # Apply threshold and limit
         filtered = [
             chunk for chunk in merged
-            if chunk.score >= threshold
+            if chunk.score >= (threshold if vector_results else 0.01)
         ][:top_k]
-
-        # Also check teacher corrections
-        corrections = await self._find_corrections(
-            query_embedding, db, top_k=3
-        )
 
         logger.info(
             f"Retrieved {len(filtered)} chunks "

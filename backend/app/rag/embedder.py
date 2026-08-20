@@ -14,25 +14,33 @@ EMBED_BATCH_SIZE = 50
 class EmbeddingService:
     """Generate embeddings using the configured AI provider."""
 
-    def __init__(self, provider: AIProvider):
+    def __init__(self, provider: AIProvider | None = None):
         self.provider = provider
 
     async def embed_text(self, text: str) -> list[float]:
         """Generate embedding for a single text."""
-        if not text or not text.strip():
-            return [0.0] * 768  # Zero vector for empty text
+        if not self.provider or not text or not text.strip():
+            return [0.0] * 768  # Zero vector for empty text or no provider
 
-        return await self.provider.embed(text)
+        try:
+            return await self.provider.embed(text)
+        except Exception as e:
+            logger.warning(f"Embedding failed: {e}")
+            return [0.0] * 768
 
     async def embed_query(self, text: str) -> list[float]:
         """Generate embedding optimized for query retrieval."""
-        if not text or not text.strip():
+        if not self.provider or not text or not text.strip():
             return [0.0] * 768
 
-        # Use query-specific embedding if available (Gemini supports this)
-        if hasattr(self.provider, "embed_query"):
-            return await self.provider.embed_query(text)
-        return await self.provider.embed(text)
+        try:
+            # Use query-specific embedding if available (Gemini supports this)
+            if hasattr(self.provider, "embed_query"):
+                return await self.provider.embed_query(text)
+            return await self.provider.embed(text)
+        except Exception as e:
+            logger.warning(f"Query embedding failed: {e}")
+            return [0.0] * 768
 
     async def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """

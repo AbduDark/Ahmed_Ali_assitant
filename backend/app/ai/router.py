@@ -90,7 +90,7 @@ def create_failover_chain() -> FailoverChain:
     return FailoverChain(providers)
 
 
-def get_embedding_provider() -> AIProvider:
+def get_embedding_provider() -> AIProvider | None:
     """Get the provider to use for embeddings (prefers Gemini for cost)."""
     # Try Gemini first (free tier)
     if settings.gemini_api_key:
@@ -104,6 +104,4 @@ def get_embedding_provider() -> AIProvider:
         if provider and provider.supports_embeddings:
             return provider
 
-    raise RuntimeError(
-        "No embedding provider available. Configure GEMINI_API_KEY or OPENAI_API_KEY."
-    )
+    return None

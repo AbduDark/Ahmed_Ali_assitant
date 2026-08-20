@@ -36,10 +36,10 @@ class AnswerValidator:
         Returns:
             (final_answer, confidence_score, is_grounded)
         """
-        # If no chunks were retrieved, the answer is ungrounded
+        # If no chunks were retrieved, the answer relies on LLM general knowledge
         if not retrieved_chunks:
-            logger.warning("No chunks retrieved — answer is ungrounded")
-            return LOW_CONFIDENCE_MSG_AR, 0.0, False
+            logger.info("No chunks retrieved — answering from model knowledge")
+            return answer, 0.75, False
 
         # Calculate confidence based on retrieval quality
         confidence = self._calculate_confidence(retrieved_chunks)
