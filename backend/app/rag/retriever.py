@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from sqlalchemy import func, select, text
+from sqlalchemy import String, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -148,7 +148,7 @@ class HybridRetriever:
             )
             .join(Reference, ReferenceChunk.reference_id == Reference.id)
             .where(
-                Reference.status == ReferenceStatus.READY,
+                func.cast(Reference.status, String).ilike("%ready%"),
                 Reference.deleted_at.is_(None),
                 ReferenceChunk.embedding.isnot(None),
             )
@@ -221,7 +221,7 @@ class HybridRetriever:
             )
             .join(Reference, ReferenceChunk.reference_id == Reference.id)
             .where(
-                Reference.status == ReferenceStatus.READY,
+                func.cast(Reference.status, String).ilike("%ready%"),
                 Reference.deleted_at.is_(None),
                 func.to_tsvector("simple", ReferenceChunk.content).op("@@")(ts_query),
             )

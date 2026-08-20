@@ -168,6 +168,11 @@ class RAGPipeline:
             latency_ms = int((time.monotonic() - start_time) * 1000)
             logger.error(f"RAG pipeline failed: {e}")
 
+            try:
+                await db.rollback()
+            except Exception:
+                pass
+
             # Log the failure
             await self._log_usage(
                 db,
