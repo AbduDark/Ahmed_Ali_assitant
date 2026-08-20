@@ -1,7 +1,7 @@
-import React, { useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { instructionsApi } from '@/services/api';
-import { Brain, Plus, Trash2, X, Sparkles, Sliders, CheckCircle2 } from 'lucide-react';
+import { Brain, Plus, Trash2, X, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function InstructionsPage() {
   const queryClient = useQueryClient();

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { conversationsApi } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, ChevronLeft, Calendar, Search, User } from 'lucide-react';
+import { MessageSquare, ChevronLeft, Calendar, Search } from 'lucide-react';
 
 export default function ConversationsPage() {
   const navigate = useNavigate();

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { dashboardApi } from '@/services/api';
@@ -7,7 +6,6 @@ import {
   MessageSquare,
   BookOpen,
   Brain,
-  AlertTriangle,
   Star,
   Clock,
   Zap,

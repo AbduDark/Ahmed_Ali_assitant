@@ -1,6 +1,4 @@
-import React from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../lib/auth';
 
 const routeTitles: Record<string, string> = {
   '/': 'نظرة عامة والتحليلات',
@@ -13,10 +11,15 @@ const routeTitles: Record<string, string> = {
   '/analytics': 'إحصائيات استهلاك الذكاء الاصطناعي',
 };
 
-export const Header: React.FC = () => {
+export const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    navigate('/login');
+  };
 
   const currentTitle = routeTitles[location.pathname] || 'لوحة التحكم';
 
@@ -56,17 +59,14 @@ export const Header: React.FC = () => {
         {/* User Info & Quick Logout */}
         <div className="flex items-center gap-3 border-r border-slate-700/60 pr-3">
           <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-indigo-500/20">
-            {user?.name ? user.name[0].toUpperCase() : 'أ'}
+            أ
           </div>
           <div className="hidden lg:block text-right">
-            <div className="text-xs font-bold text-slate-200">{user?.name || 'الأستاذ أحمد علي'}</div>
-            <div className="text-[11px] text-slate-400">{user?.role || 'المشرف العام'}</div>
+            <div className="text-xs font-bold text-slate-200">الأستاذ أحمد علي</div>
+            <div className="text-[11px] text-slate-400">المشرف العام</div>
           </div>
           <button
-            onClick={() => {
-              logout();
-              navigate('/login');
-            }}
+            onClick={handleLogout}
             className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
             title="تسجيل الخروج"
           >

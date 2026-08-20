@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subjectsApi } from '@/services/api';
 import { Layers, Plus, ChevronDown, ChevronLeft, BookMarked, Folder, FileText, X } from 'lucide-react';

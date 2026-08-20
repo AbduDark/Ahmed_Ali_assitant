@@ -1,11 +1,8 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { analyticsApi } from '@/services/api';
 import {
-  BarChart3,
   Cpu,
   Zap,
-  AlertTriangle,
   Clock,
   TrendingUp,
   Server,

@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { correctionsApi } from '@/services/api';
 import { CheckCircle, Plus, Trash2, X, AlertTriangle, ShieldCheck, HelpCircle } from 'lucide-react';

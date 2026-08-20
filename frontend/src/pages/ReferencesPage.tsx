@@ -1,4 +1,4 @@
-import React, { useState, useRef, type FormEvent } from 'react';
+import { useState, useRef, type FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { referencesApi } from '@/services/api';
 import {
@@ -15,7 +15,6 @@ import {
   FileUp,
   Globe,
   ExternalLink,
-  Link2,
 } from 'lucide-react';
 
 const statusConfig: Record<string, { label: string; chipClass: string; icon: React.ComponentType<{ className?: string }> }> = {

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { studentsApi } from '@/services/api';
-import { Users, Search, MessageSquare, ExternalLink, Calendar, UserCheck } from 'lucide-react';
+import { Users, Search, MessageSquare, ExternalLink, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function StudentsPage() {
