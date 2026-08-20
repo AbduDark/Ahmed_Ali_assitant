@@ -55,7 +55,7 @@ RedisConn = Annotated[aioredis.Redis, Depends(get_redis)]
 # ── Authentication ───────────────────────────────────────────
 
 async def get_current_user_id(
-    authorization: Annotated[str | None, Header(alias="Authorization")] = None,
+    authorization: Annotated[str | None, Header()] = None,
 ) -> str:
     """Extract and validate the current user ID from the JWT Bearer token."""
     if not authorization or not authorization.startswith("Bearer "):
@@ -77,4 +77,4 @@ async def get_current_user_id(
         raise TokenExpiredError()
 
 
-CurrentUserId = Annotated[str, Depends(get_current_user_id)]
+CurrentUserId = get_current_user_id
