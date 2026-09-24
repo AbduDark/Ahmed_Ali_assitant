@@ -133,7 +133,7 @@ export default function InstructionsPage() {
           </div>
           <h3 className="text-base font-bold text-white mb-1">لا توجد تعليمات مخصصة</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-6">
-            يعمل المساعد حالياً بالقواعد القياسية لمدرسي التاريخ والجغرافيا. يمكنك إضافة تعليمات إضافية في أي وقت.
+            يعمل المساعد حالياً بالقواعد القياسية لمدرسي التاريخ. يمكنك إضافة تعليمات إضافية في أي وقت.
           </p>
           <button onClick={() => setShowAdd(true)} className="btn-pro btn-pro-primary">
             <Plus className="w-4 h-4" />

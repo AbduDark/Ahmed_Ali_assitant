@@ -72,7 +72,7 @@ export default function DashboardPage() {
               مرحباً بك، <span className="gradient-brand">أستاذ أحمد علي</span> 🎓
             </h2>
             <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
-              المساعد الذكي جاهز للرد على استفسارات طلاب التاريخ والجغرافيا بدقة وفقاً للمراجع والتعليمات المعتمدة.
+              المساعد الذكي جاهز للرد على استفسارات طلاب التاريخ بدقة وفقاً للمراجع والتعليمات المعتمدة.
             </p>
           </div>
 

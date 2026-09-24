@@ -128,7 +128,7 @@ async def subjects_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     if not subjects:
         await update.message.reply_text(
-            "📚 **المواد الدراسية:**\n\nلا توجد مواد مضافة حالياً في النظام.\nيمكنك طرح سؤالك في التاريخ أو الجغرافيا مباشرة وسأساعدك! 🎓",
+            "📚 **المواد الدراسية:**\n\nلا توجد مواد مضافة حالياً في النظام.\nيمكنك طرح سؤالك في التاريخ مباشرة وسأساعدك! 🎓",
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=QUICK_MENU_KEYBOARD,
         )

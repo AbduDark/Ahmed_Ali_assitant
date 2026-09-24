@@ -128,7 +128,7 @@ export default function SubjectsPage() {
           </div>
           <h3 className="text-base font-bold text-white mb-1">لا توجد مواد مضافة بعد</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-6">
-            أضف المواد (مثل التاريخ، الجغرافيا) لتنظيم المنهج الدراسي وربطه بالمراجع.
+            أضف المواد (مثل التاريخ) لتنظيم المنهج الدراسي وربطه بالمراجع.
           </p>
           <button onClick={() => setShowAdd(true)} className="btn-pro btn-pro-primary">
             <Plus className="w-4 h-4" />

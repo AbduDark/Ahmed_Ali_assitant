@@ -70,7 +70,7 @@ export default function Sidebar() {
             <div className="text-xs font-bold text-slate-200 truncate">أ/ أحمد علي</div>
             <div className="text-[10px] text-emerald-400 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              مدرس أول تاريخ وجغرافيا
+              مدرس أول تاريخ
             </div>
           </div>
         </div>
