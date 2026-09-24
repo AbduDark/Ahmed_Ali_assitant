@@ -25,6 +25,7 @@ from app.messaging.telegram.formatter import (
     format_help_message,
     format_welcome_message,
     truncate_message,
+    split_message,
 )
 from app.models.conversation import Conversation, Message, MessageRole
 from app.models.student import Student
@@ -327,12 +328,25 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
             await db.commit()
 
-            # Send response with interactive inline keyboard
-            await update.message.reply_text(
-                truncate_message(full_response),
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=get_answer_inline_keyboard(),
-            )
+            # Send response in chunks (to support long answers without truncation)
+            chunks = split_message(full_response)
+            for i, chunk in enumerate(chunks):
+                is_last = (i == len(chunks) - 1)
+                reply_markup = get_answer_inline_keyboard() if is_last else None
+                try:
+                    await update.message.reply_text(
+                        chunk,
+                        parse_mode=ParseMode.MARKDOWN,
+                        reply_markup=reply_markup,
+                    )
+                except Exception as md_err:
+                    logger.warning(
+                        f"Markdown parsing failed on chunk {i+1}/{len(chunks)}: {md_err}. Sending as plain text."
+                    )
+                    await update.message.reply_text(
+                        chunk,
+                        reply_markup=reply_markup,
+                    )
 
         except Exception as e:
             stop_typing_event.set()

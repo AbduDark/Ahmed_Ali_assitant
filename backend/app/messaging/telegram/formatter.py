@@ -3,6 +3,57 @@
 from __future__ import annotations
 
 
+def split_message(text: str, max_length: int = 4000) -> list[str]:
+    """
+    Split a long message into multiple chunks suitable for Telegram.
+    Telegram has a 4096 character limit per message.
+    Tries to split cleanly at paragraph breaks, newlines, or sentence boundaries.
+    """
+    if not text:
+        return []
+    if len(text) <= max_length:
+        return [text]
+
+    chunks: list[str] = []
+    remaining = text.strip()
+
+    while remaining:
+        if len(remaining) <= max_length:
+            chunks.append(remaining)
+            break
+
+        segment = remaining[:max_length]
+
+        # 1. Try paragraph break
+        split_pos = segment.rfind("\n\n")
+
+        # 2. Try single newline
+        if split_pos == -1 or split_pos < max_length // 3:
+            split_pos = segment.rfind("\n")
+
+        # 3. Try Arabic/English sentence endings
+        if split_pos == -1 or split_pos < max_length // 3:
+            for punct in [". ", "؟ ", "! ", "، ", ".\n", "؟\n", "!\n"]:
+                pos = segment.rfind(punct)
+                if pos > split_pos:
+                    split_pos = pos + len(punct) - 1
+
+        # 4. Try whitespace
+        if split_pos == -1 or split_pos < max_length // 3:
+            split_pos = segment.rfind(" ")
+
+        # 5. Fallback hard cut
+        if split_pos <= 0:
+            split_pos = max_length
+
+        chunk = remaining[:split_pos].strip()
+        if chunk:
+            chunks.append(chunk)
+        remaining = remaining[split_pos:].lstrip()
+
+    return chunks or [text]
+
+
 def truncate_message(text: str, max_length: int = 4096) -> str:
     """
     Telegram messages have a 4096 character limit.
